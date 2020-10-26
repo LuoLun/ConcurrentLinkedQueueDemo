@@ -50,7 +50,7 @@ public class ConcurrentLinkedQueue<E> implements Queue<E> {
     }
 
     private boolean casTail(Node<E> oldTail, Node<E> newTail) {
-        return unsafe.compareAndSwapObject(this, headOffset, tail, newTail);
+        return unsafe.compareAndSwapObject(this, tailOffset, tail, newTail);
     }
 
     private boolean casValue(Node<E> node, E oldValue, E newValue) {
@@ -73,6 +73,7 @@ public class ConcurrentLinkedQueue<E> implements Queue<E> {
             if (p.next == null) {
                 Node<E> newTail = new Node<>(e);
                 if (casNext(p, null, newTail)) {
+                    casTail(p, newTail);
                     return true;
                 }
             } else if (p.next == p) { // 如果当前节点已经不在链表里，则指向自己作为标记
@@ -93,7 +94,6 @@ public class ConcurrentLinkedQueue<E> implements Queue<E> {
             if (p == null) return null;
             E res = p.value;
             if (casNext(head, p, p.next)) {
-                // head.next = head.next.next;
                 return res;
             }
         }
