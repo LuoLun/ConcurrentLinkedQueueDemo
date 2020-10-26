@@ -83,7 +83,8 @@ public class BaseTest {
             this.queue = new ConcurrentLinkedQueue<>();
         }
 
-        // 6s196ms
+        // RANGE = 10000
+        // 1s637ms
         @Test
         @Override
         public void test() throws InterruptedException {
@@ -96,7 +97,8 @@ public class BaseTest {
             this.queue = new java.util.concurrent.ConcurrentLinkedQueue<>();
         }
 
-        // 1s145ms
+        // RANGE = 10000
+        // 1s179ms
         @Test
         @Override
         public void test() throws InterruptedException {
