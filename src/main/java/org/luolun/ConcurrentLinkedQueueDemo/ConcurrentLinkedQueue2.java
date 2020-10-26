@@ -2,20 +2,19 @@ package org.luolun.ConcurrentLinkedQueueDemo;
 
 import sun.misc.Unsafe;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.function.Predicate;
 
 /**
- * 不支持 {@link #remove(Object)}、{@link #removeIf(Predicate)}、{@link #iterator()} 操作的话，就不需要考虑节点为空的情况，
- * 可减少edge case，实现起来比较简单，方便理解和学习；这种实现使得null也可以作为节点内容
+ * 第二个版本，实现延后1次更新head/tail，看看性能如何
  * @param <E> 节点值类型
  */
-public class ConcurrentLinkedQueue<E> implements Queue<E> {
+public class ConcurrentLinkedQueue2<E> implements Queue<E> {
 
-    private static Unsafe unsafe = UnsafeUtil.createUnsafe();
+    private static final Unsafe unsafe = UnsafeUtil.createUnsafe();
 
     private static class Node<E> {
         volatile E value;
@@ -36,8 +35,9 @@ public class ConcurrentLinkedQueue<E> implements Queue<E> {
 
     static {
         try {
-            headOffset = unsafe.objectFieldOffset(ConcurrentLinkedQueue.class.getDeclaredField("head"));
-            tailOffset = unsafe.objectFieldOffset(ConcurrentLinkedQueue.class.getDeclaredField("tail"));
+            assert unsafe != null;
+            headOffset = unsafe.objectFieldOffset(ConcurrentLinkedQueue2.class.getDeclaredField("head"));
+            tailOffset = unsafe.objectFieldOffset(ConcurrentLinkedQueue2.class.getDeclaredField("tail"));
             nodeValueOffset = unsafe.objectFieldOffset(Node.class.getDeclaredField("value"));
             nodeNextOffset = unsafe.objectFieldOffset(Node.class.getDeclaredField("next"));
         } catch (NoSuchFieldException e) {
@@ -72,9 +72,7 @@ public class ConcurrentLinkedQueue<E> implements Queue<E> {
         while (true) {
             if (p.next == null) {
                 Node<E> newTail = new Node<>(e);
-                if (casNext(p, null, newTail)) {
-                    return true;
-                }
+                if (casNext(p, null, newTail)) return true;
             } else if (p.next == p) { // 如果当前节点已经不在链表里，则指向自己作为标记
                 p = head;
             } else {
