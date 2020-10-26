@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class BaseTest {
-    public static final int RANGE = 10000;
+    public static final int RANGE = 320000;
     private static Logger logger = LogManager.getLogger(BaseTest.class);
 
     Queue<Integer> queue;
@@ -83,8 +83,11 @@ public class BaseTest {
             this.queue = new ConcurrentLinkedQueue<>();
         }
 
-        // RANGE = 10000
-        // 1s637ms
+        // RANGE = 10000, 1s637ms
+        // RANGE = 20000, 1s705ms
+        // RANGE = 40000, 2s104ms
+        // RANGE = 80000, 2s343ms
+        // RANGE = 320000, 3s955ms
         @Test
         @Override
         public void test() throws InterruptedException {
@@ -97,8 +100,11 @@ public class BaseTest {
             this.queue = new java.util.concurrent.ConcurrentLinkedQueue<>();
         }
 
-        // RANGE = 10000
-        // 1s179ms
+        // RANGE = 10000, 1s179ms
+        // RANGE = 20000, 1s256ms
+        // RANGE = 40000, 1s418ms
+        // RANGE = 80000, 1s698ms
+        // RANGE = 320000, 3s111ms
         @Test
         @Override
         public void test() throws InterruptedException {
